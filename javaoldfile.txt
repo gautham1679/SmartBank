@@ -1,0 +1,54 @@
+import java.util.Scanner;
+public class BankApp {
+    public static void main(String[] args) {
+        Scanner sc= new Scanner(System.in);
+        System.out.println("Enter Account Holder Name");
+        String Acname= sc.nextLine();
+        System.out.println("Enter Account Number");
+        int Acno =sc.nextInt();
+        System.out.println("Enter Account Balance");
+        double Acbal=sc.nextDouble();
+        sc.nextLine();
+
+        BankAccount account =new BankAccount(Acname,Acno,Acbal);
+        int choice;
+        do{
+            System.out.println("======== Welcome to SmartBank!=========");
+            System.out.println("1. Deposit");
+            System.out.println("2. Withdraw");
+            System.out.println("3. Check Balance");
+            System.out.println("4. Exit");
+
+            choice =sc.nextInt();
+
+            switch(choice){
+                case 1:
+                    System.out.println("Enter amount to deposit");
+                    double deposit =sc.nextDouble();
+                    account.deposit(deposit);
+                    break;
+
+                case 2:
+                    System.out.print("\nEnter withdraw amount: ");
+                    double withdrawAmount = sc.nextDouble();
+                    account.withdraw(withdrawAmount);
+                    break;
+                
+                case 3:
+                    account.checkBalance();
+                    break;
+                
+                case 4:
+                    System.out.println("Thank you for using SmartBank. Goodbye!");
+                    break;
+
+                default:
+                    System.out.println("❌ Invalid choice. Please try again.");
+                    
+             
+            }
+        }while(choice !=4);
+        sc.close();
+
+    }
+}

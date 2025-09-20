@@ -1,54 +1,56 @@
+import java.util.InputMismatchException;
 public abstract class BankAccount implements Transaction{
-    private String Accountname;
-    private int AccountNo;
-    protected double AccountBalance;
+    private String accountName;
+    private int accountNo;
+    protected double accountBalance;
 
-    public BankAccount(String hi,int hello,double hey){
-        Accountname=hi;
-        AccountNo=hello;
-        AccountBalance=hey;
+    public BankAccount(String name, int number, double balance){
+        this.accountName = name;
+        this.accountNo = number;
+        this.accountBalance = balance;
     }
 
-
     public String getAccountName(){
-        return Accountname;
+        return accountName;
     }
 
     public int getAccountNo(){
-        return AccountNo;
+        return accountNo;
     }
 
     public double getAccountBalance(){
-        return AccountBalance;
-    }
-    @Override
-    public void deposit(double amount){
-        AccountBalance+=amount;
-        System.out.println("Deposited: " + amount);
-        System.out.println("New Balance: " + AccountBalance);
+        return accountBalance;
     }
 
+    @Override
+    public void deposit(double amount){
+        accountBalance+=amount;
+        System.out.println("Deposited: " + amount);
+        System.out.println("New Balance: " + accountBalance);
+    }
     
     @Override
     public void deposit(double amount, String mode) {
-        AccountBalance += amount;
+        accountBalance += amount;
         System.out.println("Deposited: ₹" + amount + " via " + mode);
-        System.out.println("New Balance: ₹" + AccountBalance);
+        System.out.println("New Balance: ₹" + accountBalance);
     }
 
     @Override
-    public void withdraw(double amount) throws InsufficientBalanceException {
-        if (amount>AccountBalance){
+    public void withdraw(double amount) { // No 'throws' clause here
+        if (amount > accountBalance){
             throw new InsufficientBalanceException("❌ Withdrawal failed! Insufficient balance.");
         }else{
-            AccountBalance-=amount;
+            accountBalance -= amount;
             System.out.println("Withdrew: " + amount);
-            System.out.println("New Balance: " + AccountBalance);
+            System.out.println("New Balance: " + accountBalance);
         }
     }
+    
     @Override
     public void checkBalance(){
-        System.out.println("Account Balance: " + AccountBalance);
+        System.out.println("Account Balance: " + accountBalance);
     }
+    
     public abstract String accountType();
 }

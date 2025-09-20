@@ -12,7 +12,7 @@ public class CurrentAccount extends BankAccount implements Loanservices {
         if (amount > (getAccountBalance() + overdraftLimit)) {
             System.out.println("❌ Overdraft limit exceeded!");
         } else {
-            AccountBalance -= amount; // balance is protected → accessible in child
+            accountBalance -= amount;
             System.out.println("Withdrawn: ₹" + amount);
         }
     }

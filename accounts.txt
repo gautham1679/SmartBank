@@ -1,0 +1,3 @@
+1234,Gautham,Savings Account,100.0
+1234567,Naji,Savings Account,0.0
+123,Gokul,Current Account,10.0

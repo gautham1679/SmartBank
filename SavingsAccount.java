@@ -1,4 +1,5 @@
-public class SavingsAccount extends BankAccount {
+import java.io.Serializable;
+public class SavingsAccount extends BankAccount implements Serializable{
     private double interestRate;
 
     public SavingsAccount(String accountname, int accountNo, double AccountBalance, double interestRate) {

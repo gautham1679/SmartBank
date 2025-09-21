@@ -5,6 +5,11 @@ import java.io.IOException;
 import java.util.InputMismatchException;
 import java.util.HashMap;
 import java.util.Scanner;
+import java.io.FileOutputStream;
+import java.io.ObjectOutputStream;
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
+import java.io.File;
 
 public class BankApp {
     public static void main(String[] args) {
@@ -22,17 +27,37 @@ public class BankApp {
                 System.out.println("4. Check Balance");
                 System.out.println("5. Show All Accounts");
                 System.out.println("6. Apply for Loan");
-                System.out.println("7. Exit");
+                System.out.println("7. Show Transaction History");
+                System.out.println("8. Delete an Account"); // New option
+                System.out.println("9. Reset All Records");                
+                System.out.println("10. Exit");
 
                 choice = sc.nextInt();
                 sc.nextLine(); // Consume the leftover newline character
 
                 switch (choice) {
+                    // In BankApp.java, inside the switch statement
+
                     case 1:
                         System.out.print("Enter Account Holder Name: ");
                         String name = sc.nextLine();
-                        System.out.print("Enter Account Number: ");
-                        int number = sc.nextInt();
+                        
+                        int number;
+                        while (true) {
+                            System.out.print("Enter Account Number (5 digits only): ");
+                            try {
+                                number = sc.nextInt();
+                                if (number >= 10000 && number <= 99999) {
+                                    sc.nextLine(); // Consume newline
+                                    break; // Exit the loop if input is valid
+                                } else {
+                                    System.out.println("❌ Invalid account number. Must be exactly 5 digits.");
+                                }
+                            } catch (InputMismatchException e) {
+                                System.out.println("❌ Invalid input. Please enter a number.");
+                                sc.nextLine(); // Clear invalid input from the scanner
+                            }
+                        }
 
                         // Step 16: Check for duplicate account number
                         if (accounts.containsKey(number)) {
@@ -47,7 +72,7 @@ public class BankApp {
 
                         BankAccount newAccount = null;
                         if (type == 1) {
-                            System.out.println("Enter Interest Rate (%): ");
+                            System.out.print("Enter Interest Rate (%): ");
                             double interestRate = sc.nextDouble();
                             newAccount = new SavingsAccount(name, number, balance, interestRate);
                         } else if (type == 2) {
@@ -59,9 +84,8 @@ public class BankApp {
                             break;
                         }
 
-                        // Use HashMap's put() method instead of add()
                         accounts.put(number, newAccount);
-                        saveAccounts(accounts); // Save accounts after creation
+                        saveAccounts(accounts);
                         System.out.println("✅ Account created successfully! " + name);
                         break;
 
@@ -142,6 +166,41 @@ public class BankApp {
                         break;
 
                     case 7:
+                        System.out.println("Enter Account Number:");
+                        int historyNumber = sc.nextInt();
+                        sc.nextLine(); // Consume newline
+                        BankAccount historyAc = accounts.get(historyNumber);
+                        if (historyAc != null) {
+                            historyAc.showTransactionHistory();
+                        } else {
+                            System.out.println("Account not found.");
+                        }
+                        break;
+
+                    
+
+                    case 8:
+                        System.out.println("Enter the Account Number to delete:");
+                        int accountToDelete = sc.nextInt();
+
+                        // The HashMap's remove method returns the value that was removed
+                        // or null if the key was not found.
+                        BankAccount removedAccount = accounts.remove(accountToDelete);
+
+                        if (removedAccount != null) {
+                            System.out.println("✅ Account " + accountToDelete + " has been deleted.");
+                            saveAccounts(accounts); // Save the updated list to the file
+                        } else {
+                            System.out.println("❌ Account not found. No account was deleted.");
+                        }
+                        break;
+
+                    case 9:
+                        accounts.clear();
+                        deleteRecords();
+                        break;
+                
+                    case 10:
                         System.out.println("Thank you for using SmartBank. Goodbye!");
                         break;
 
@@ -153,7 +212,7 @@ public class BankApp {
                 System.out.println("⚠️ Invalid input! Please enter numbers only.");
                 sc.nextLine();
             }
-        } while (choice != 7);
+        } while (choice != 10);
         sc.close();
     }
 
@@ -162,38 +221,44 @@ public class BankApp {
     }
 
     private static void saveAccounts(HashMap<Integer, BankAccount> accounts) {
-        try (FileWriter writer = new FileWriter("accounts.txt")) {
-            for (BankAccount acc : accounts.values()) {
-                writer.write(acc.getAccountNo() + "," +
-                        acc.getAccountName() + "," +
-                        acc.accountType() + "," +
-                        acc.getAccountBalance() + "\n");
-            }
+        try (FileOutputStream fileOut = new FileOutputStream("accounts.ser");
+            ObjectOutputStream out = new ObjectOutputStream(fileOut)) {
+            out.writeObject(accounts);
+            System.out.println("✅ Accounts saved to accounts.ser");
         } catch (IOException e) {
             System.out.println("⚠️ Error saving accounts: " + e.getMessage());
         }
     }
 
     private static void loadAccounts(HashMap<Integer, BankAccount> accounts) {
-        try (Scanner fileScanner = new Scanner(new File("accounts.txt"))) {
-            while (fileScanner.hasNextLine()) {
-                String line = fileScanner.nextLine();
-                String[] parts = line.split(",");
-                int number = Integer.parseInt(parts[0]);
-                String name = parts[1];
-                String type = parts[2];
-                double balance = Double.parseDouble(parts[3]);
-
-                BankAccount acc;
-                if (type.equals("Savings Account")) {
-                    acc = new SavingsAccount(name, number, balance, 5.0);
-                } else {
-                    acc = new CurrentAccount(name, number, balance, 2000.0);
-                }
-                accounts.put(number, acc);
-            }
+        try (FileInputStream fileIn = new FileInputStream("accounts.ser");
+            ObjectInputStream in = new ObjectInputStream(fileIn)) {
+            HashMap<Integer, BankAccount> loadedAccounts = (HashMap<Integer, BankAccount>) in.readObject();
+            accounts.putAll(loadedAccounts);
+            System.out.println("✅ Accounts loaded successfully from accounts.ser");
         } catch (FileNotFoundException e) {
             System.out.println("ℹ️ No previous accounts found. Starting fresh.");
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println("⚠️ Error loading accounts: " + e.getMessage());
         }
     }
+
+    // In BankApp.java, as a new private static method
+    private static void deleteRecords() {
+        File file = new File("accounts.ser");
+        if (file.exists()) {
+            if (file.delete()) {
+                System.out.println("✅ All account records have been deleted.");
+            } else {
+                System.out.println("❌ Failed to delete the records file.");
+            }
+        } else {
+            System.out.println("ℹ️ No records file found to delete.");
+        }
+    }
+
+
+
+
+    
 }

@@ -1,4 +1,6 @@
-public class CurrentAccount extends BankAccount implements Loanservices {
+import java.io.Serializable;
+
+public class CurrentAccount extends BankAccount implements Loanservices,Serializable {
     private double overdraftLimit;
 
     public CurrentAccount(String accountHolder, int accountNumber, double balance, double overdraftLimit) {
